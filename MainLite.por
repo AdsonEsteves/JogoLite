@@ -28,7 +28,7 @@ programa
 		const inteiro BOTAO_RESET = 6
 		const inteiro BOTAO_EXCLUIR =7
 		
-		const inteiro quantoanda = 1
+		const real quantoanda = 1.0
 
 		const real tamtile[2]={31.0, 31.0}
 		const real tam_mat_comandos[2]={87.5, 51.5}
@@ -987,6 +987,6 @@ programa
  * Esta seção do arquivo guarda informações do Portugol Studio.
  * Você pode apagá-la se estiver utilizando outro editor.
  * 
- * @POSICAO-CURSOR = 791; 
+ * @POSICAO-CURSOR = 790; 
  * @DOBRAMENTO-CODIGO = [57, 91, 134, 157, 161, 166, 177, 195, 210, 225, 242, 267, 282, 296, 338, 344, 373, 401, 416, 447, 462, 471, 497, 504, 517, 542, 586, 594, 615, 628, 634, 654, 667, 693, 718, 730, 739, 746, 794, 818, 824, 830, 836, 842, 849, 862, 872, 878, 902, 917, 931, 938, 945, 950, 970, 977];
  */
