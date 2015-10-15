@@ -89,20 +89,26 @@ programa
 
 	inteiro posicao_x_mouse=0, posicao_y_mouse=0
 
+	inteiro digitos_por_tile=8, digitos_parte=2
+	inteiro NUMERO_LINHAS=8, NUMERO_COLUNAS=8
+
+	inteiro nivel=1
+	cadeia nome_arquivo=""
+
 	inteiro sprite[4][10]={	{32,  80, 56,  80, 86,  80, 120,  80, 153,  80},
 						{32, 160, 56, 160, 86, 160, 120, 160, 153, 160},
 						{32, 236, 56, 236, 86, 236, 120, 236, 153, 236},
 						{32, 317, 56, 317, 86, 317, 120, 317, 153, 317}}
 							
 
-	inteiro mapa[8][8]={{0, 0, 1, 1, 0, 0, 0, 1}, 
-					{0, 0, 0, 4, 0, 0, 0, 0}, 
-					{0, 2, 0, 0, 0, 0, 0, 0},
-					{0, 1, 0, 0, 0, 1, 0, 0},
-					{0, 1, 0, 2, 0, 0, 0, 0},
-					{0, 1, 0, 0, 0, 0, 0, 0},
-					{0, 3, 0, 0, 2, 0, 0, 0}, 
-					{0, 0, 0, 0, 0, 0, 0, 1}} 
+	inteiro mapa[8][8]={{0, 0, 0, 0, 0, 0, 0, 0}, 
+					{0, 0, 0, 0, 0, 0, 0, 0}, 
+					{0, 0, 0, 0, 0, 0, 0, 0},
+					{0, 0, 0, 0, 0, 0, 0, 0},
+					{0, 0, 0, 0, 0, 0, 0, 0},
+					{0, 0, 0, 0, 0, 0, 0, 0},
+					{0, 0, 0, 0, 0, 0, 0, 0}, 
+					{0, 0, 0, 0, 0, 0, 0, 0}} 
 
 	inteiro mapa_char[8][8]={{0, 0, 0, 0, 0, 0, 0, 0}, 
 					  	{0, 0, 0, 0, 0, 0, 0, 0}, 
@@ -111,25 +117,25 @@ programa
 					  	{0, 0, 0, 0, 0, 0, 0, 0},
 					  	{0, 0, 0, 0, 0, 0, 0, 0},
 					  	{0, 0, 0, 0, 0, 0, 0, 0}, 
-					  	{1, 0, 0, 0, 0, 0, 0, 0}}
+					  	{0, 0, 0, 0, 0, 0, 0, 0}}
 
 	inteiro mapa_cerca_horizontal[9][8] = { {0, 0, 0, 0, 0, 0, 0, 0}, 
-					  	 			{0, 1, 0, 0, 1, 0, 0, 0}, 
+					  	 			{0, 0, 0, 0, 0, 0, 0, 0}, 
 					  	 			{0, 0, 0, 0, 0, 0, 0, 0},
 					  	 			{0, 0, 0, 0, 0, 0, 0, 0},
 					  	 			{0, 0, 0, 0, 0, 0, 0, 0},
 					  	 			{0, 0, 0, 0, 0, 0, 0, 0},
 					  	 			{0, 0, 0, 0, 0, 0, 0, 0},
-					  	 			{0, 0, 3, 0, 0, 0, 0, 0}, 
+					  	 			{0, 0, 0, 0, 0, 0, 0, 0}, 
 					  	 			{0, 0, 0, 0, 0, 0, 0, 0}}
 
 	inteiro mapa_cerca_vertical[8][9] = { 	{0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-						  	 		{0, 0, 0, 0, 0, 0, 6, 0, 0}, 
+						  	 		{0, 0, 0, 0, 0, 0, 0, 0, 0}, 
 						  	 		{0, 0, 0, 0, 0, 0, 0, 0, 0},
 						  	 		{0, 0, 0, 0, 0, 0, 0, 0, 0},
-						  	 		{4, 0, 0, 0, 0, 0, 0, 0, 0},
 						  	 		{0, 0, 0, 0, 0, 0, 0, 0, 0},
-					  		 		{5, 0, 0, 0, 0, 0, 0, 0, 0}, 
+						  	 		{0, 0, 0, 0, 0, 0, 0, 0, 0},
+					  		 		{0, 0, 0, 0, 0, 0, 0, 0, 0}, 
 						  	 		{0, 0, 0, 0, 0, 0, 0, 0, 0}}
 
 	inteiro mat_pos_quadro_programavel[][]={{0, 0, 0, 0, 0, 0, 0},
@@ -166,6 +172,8 @@ programa
 	
 	funcao iniciar_jogo()
 	{
+		limpar_campo()
+		abrir_novo_nivel()
 		definir_posicao_original()
 		posicao_inicial()
 		faca
@@ -173,6 +181,96 @@ programa
 		jogar()
 		}enquanto(chegou_no_fim==falso)
 		proxima_fase()
+	}
+
+	funcao limpar_campo()
+	{
+		inteiro i, j
+		para(i=0; i<8; i++)
+		{
+			para(j=0; j<8; j++)
+			{
+			       mapa[i][j]=0
+			       mapa_char[i][j]=0
+			       mapa_cerca_horizontal[i][j]=0
+			       mapa_cerca_vertical[i][j]=0
+			}
+			mapa_cerca_vertical[i][j]=0
+		}
+		para(j=0; j<8;j++)
+		{
+			mapa_cerca_horizontal[i][j]=0	
+		}
+	}
+
+	funcao abrir_novo_nivel()
+	{
+		nome_arquivo="./fases/"+"nivel"+nivel+".lvl"
+		cadeia formatos[] =
+		{
+			"Arquivos de Level|lvl"
+		}
+		
+		carregar_nivel(nome_arquivo)
+
+	}
+	
+	funcao carregar_nivel(cadeia nome_arquivo)
+	{		
+		se(a.arquivo_existe(nome_arquivo))
+		{
+			inteiro arquivo, linha = 0, coluna=0
+			cadeia texto_linha
+			
+			arquivo = a.abrir_arquivo(nome_arquivo, a.MODO_LEITURA)
+			
+			enquanto(linha<NUMERO_LINHAS)
+			{
+				texto_linha = a.ler_linha(arquivo)
+				para(coluna=0; coluna<NUMERO_COLUNAS; coluna++)
+				{
+					cadeia temp = tx.extrair_subtexto(texto_linha, coluna*digitos_por_tile, coluna*digitos_por_tile+digitos_por_tile)
+					
+					cadeia tchar=tx.extrair_subtexto(temp, 0, digitos_parte)
+					cadeia ttile=tx.extrair_subtexto(temp, digitos_parte, digitos_parte*2)
+					cadeia tcerca_h=tx.extrair_subtexto(temp, digitos_parte*2, digitos_parte*3)
+					cadeia tcerca_v=tx.extrair_subtexto(temp, digitos_parte*3, digitos_parte*4)
+					
+					mapa_char[linha][coluna]= tp.cadeia_para_inteiro(tchar, 16)%10
+					mapa[linha][coluna] = tp.cadeia_para_inteiro(ttile, 16)/10					
+					direcao_inicial(tp.cadeia_para_inteiro(tchar, 16))					
+					mapa_cerca_horizontal[linha][coluna]= tp.cadeia_para_inteiro(tcerca_h, 16)
+					mapa_cerca_vertical[linha][coluna]= tp.cadeia_para_inteiro(tcerca_v, 16)
+					
+				}
+				cadeia temp = tx.extrair_subtexto(texto_linha, (coluna)*digitos_por_tile, (coluna)*digitos_por_tile+digitos_por_tile)
+				cadeia tcerca_v=tx.extrair_subtexto(temp, digitos_parte*3, digitos_parte*4)
+				mapa_cerca_vertical[linha][coluna]= tp.cadeia_para_inteiro(tcerca_v, 16)
+				
+				linha++
+			}
+			texto_linha = a.ler_linha(arquivo)
+			para(coluna=0; coluna<NUMERO_COLUNAS;coluna++)
+			{
+				cadeia temp = tx.extrair_subtexto(texto_linha, coluna*digitos_por_tile, coluna*digitos_por_tile+digitos_por_tile)
+				cadeia tcerca_h=tx.extrair_subtexto(temp, digitos_parte*3, digitos_parte*4)
+				mapa_cerca_horizontal[linha][coluna]= tp.cadeia_para_inteiro(tcerca_h, 16)			
+			}
+
+			a.fechar_arquivo(arquivo)
+		}
+	}
+	
+	funcao direcao_inicial(inteiro d)
+	{
+		d=d/10
+		escolha(d)
+		{
+			caso 1 : direcao=leste pare
+			caso 2 : direcao=norte pare
+			caso 3 : direcao=sul pare
+			caso 4 : direcao=oeste pare
+		}
 	}
 	
 	funcao jogar()
@@ -187,7 +285,7 @@ programa
 			{
 				resetar()
 			}
-		}enquanto(deu_play()==falso)
+		}enquanto(nao deu_play())
 		posicao_inicial()
 		matriz_quadro_para_vetor_caminho()
 		rodar_caminho()
@@ -426,7 +524,7 @@ programa
 		          desenha_cerca(mapa_cerca_horizontal[i][j])
 		          desenha_cerca(mapa_cerca_vertical[i][j])
 				desenha_tile(mapa[i][j])
-//				debug(mapa_char[i][j])
+				debug(mapa_char[i][j])
 //				g.renderizar()
 //				u.aguarde(100)
 				se(posicao_maty==i e posicao_matx==j)
@@ -760,7 +858,7 @@ programa
 			{
 				se(x-1>-1)
 				{
-					se((mapa[y][x-1]==0 ou mapa[y][x+1]==4) e mapa_cerca_vertical[y][x]%10==0)
+					se((mapa[y][x-1]==0 ou mapa[y][x-1]==4) e mapa_cerca_vertical[y][x]%10==0)
 					{
 						retorne verdadeiro
 					}
@@ -770,7 +868,7 @@ programa
 			{
 				se(y-1>-1)
 				{
-					se((mapa[y-1][x]==0 ou mapa[y][x+1]==4) e mapa_cerca_horizontal[y][x]%10==0)
+					se((mapa[y-1][x]==0 ou mapa[y-1][x]==4) e mapa_cerca_horizontal[y][x]%10==0)
 					{
 						retorne verdadeiro
 					}
@@ -780,7 +878,7 @@ programa
 			{	
 				se(y+1<8)
 				{
-					se((mapa[y+1][x]==0 ou mapa[y][x+1]==4) e mapa_cerca_horizontal[y+1][x]%10==0)
+					se((mapa[y+1][x]==0 ou mapa[y+1][x]==4) e mapa_cerca_horizontal[y+1][x]%10==0)
 					{
 						retorne verdadeiro
 					}
@@ -945,7 +1043,9 @@ programa
 
 	funcao proxima_fase()
 	{
-		
+		nivel++
+		limpar_caminho_matriz()
+		iniciar_jogo()
 	}
 	
 	funcao carregar_imagens()
@@ -987,6 +1087,6 @@ programa
  * Esta seção do arquivo guarda informações do Portugol Studio.
  * Você pode apagá-la se estiver utilizando outro editor.
  * 
- * @POSICAO-CURSOR = 790; 
- * @DOBRAMENTO-CODIGO = [57, 91, 134, 157, 161, 166, 177, 195, 210, 225, 242, 267, 282, 296, 338, 344, 373, 401, 416, 447, 462, 471, 497, 504, 517, 542, 586, 594, 615, 628, 634, 654, 667, 693, 718, 730, 739, 746, 794, 818, 824, 830, 836, 842, 849, 862, 872, 878, 902, 917, 931, 938, 945, 950, 970, 977];
+ * @POSICAO-CURSOR = 32444; 
+ * @DOBRAMENTO-CODIGO = [57, 97, 140, 163, 167, 172, 185, 205, 217, 263, 275, 293, 308, 323, 340, 365, 380, 394, 436, 442, 471, 499, 545, 560, 569, 595, 602, 615, 640, 684, 692, 713, 726, 732, 752, 765, 791, 816, 828, 837, 844, 892, 916, 922, 928, 934, 940, 947, 960, 970, 976, 1000, 1015, 1029, 1036, 1050, 1070, 1077];
  */
