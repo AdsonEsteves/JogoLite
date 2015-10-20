@@ -24,6 +24,9 @@ programa
 		const inteiro COMANDO_DESCE = 2
 		const inteiro COMANDO_ESQUERDA = 3
 		const inteiro COMANDO_SOBE = 4
+		const inteiro COMANDO_LOOP= 8
+		const inteiro COMANDO_LOOP_inicio = 8		
+		const inteiro COMANDO_LOOP_fim = 9
 		const inteiro BOTAO_PLAY = 5
 		const inteiro BOTAO_RESET = 6
 		const inteiro BOTAO_EXCLUIR =7
@@ -55,6 +58,9 @@ programa
 	inteiro indice_imagem=0, indice_imagem_exemplo=0
 	real incrementovertical=0.0, incrementohorizontal=0.0
 	real fator_mexer_quadro=0.0, fator_mexer_matriz_comandos=0.0
+	inteiro fator_dentro_loop=100
+	inteiro pilha_de_posicao_dos_loops[]={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	inteiro topo_pilha_de_posicao=0
 	inteiro caminhochar[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 						0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 						0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -320,7 +326,7 @@ programa
 		}
 		retorne falso
 	}
-	
+	 
 	funcao pega_comando()
 	{
 		se(mouse_esta_sobre_comandos() e pegou_comando==falso)
@@ -359,6 +365,11 @@ programa
 		{
 			retorne verdadeiro
 		}
+		
+		se(objeto_clicado==COMANDO_LOOP)
+		{
+			retorne verdadeiro
+		}
 
 		retorne falso
 	}
@@ -368,9 +379,57 @@ programa
 		para(inteiro i=0; i<tam_matriz_quadro[0]; i++)
 		{
 			para(inteiro j=0; j<tam_matriz_quadro[1]; j++)
-			{
+			{		
+				se(mouse_esta_sobre_objeto(j*tam_comandos[0]+posicao_quadro[0], i*tam_comandos[1]+posicao_quadro[1], tam_comandos[0], tam_comandos[1]))
+				{
+					se(mat_pos_quadro_programavel[i][j]!=0)
+					{
+						abrir_espaco_matriz(i, j)
+						se(j+1>6)
+						{
+							se(mat_pos_quadro_programavel[i+1][0]%10==COMANDO_LOOP_fim ou mat_pos_quadro_programavel[i+1][0]>100)
+							{
+								mat_pos_quadro_programavel[i][j]=objeto_clicado+fator_dentro_loop
+								retorne
+							}	
+						}
+						se(mat_pos_quadro_programavel[i][j+1]%10==COMANDO_LOOP_fim ou mat_pos_quadro_programavel[i][j+1]>100)
+						{
+							mat_pos_quadro_programavel[i][j]=objeto_clicado+fator_dentro_loop
+							retorne
+						}
+						se(objeto_clicado==COMANDO_LOOP)
+						{
+							se(j+1>6)
+							{
+								abrir_espaco_matriz(i+1, 0)
+								mat_pos_quadro_programavel[i][j]=COMANDO_LOOP_inicio
+								mat_pos_quadro_programavel[i+1][0]=COMANDO_LOOP_fim
+								retorne
+							}
+							abrir_espaco_matriz(i, j+1)
+							mat_pos_quadro_programavel[i][j]=COMANDO_LOOP_inicio
+							mat_pos_quadro_programavel[i][j+1]=COMANDO_LOOP_fim
+							retorne
+						}
+						mat_pos_quadro_programavel[i][j]=objeto_clicado
+						retorne
+					}
+				}
 				se(mat_pos_quadro_programavel[i][j]==0)
 				{
+					se(objeto_clicado==COMANDO_LOOP)
+					{
+						se(j+1>6)
+						{
+							mat_pos_quadro_programavel[i][j]=COMANDO_LOOP_inicio
+							mat_pos_quadro_programavel[i+1][0]=COMANDO_LOOP_fim
+							retorne
+						}
+						mat_pos_quadro_programavel[i][j]=COMANDO_LOOP_inicio
+						mat_pos_quadro_programavel[i][j+1]=COMANDO_LOOP_fim
+						retorne
+					}
 					mat_pos_quadro_programavel[i][j]=objeto_clicado
 					retorne
 				}
@@ -378,6 +437,28 @@ programa
 		}
 	}
 
+	funcao abrir_espaco_matriz(inteiro i, inteiro j)
+	{
+		para(inteiro k=tam_matriz_quadro[0]-1; k>=i; k--)
+		{
+			para(inteiro l=tam_matriz_quadro[1]-1; l>=0; l--)
+			{
+				se(k==i e l==j)
+				{
+					retorne
+				}
+				se(l-1<0)
+				{
+					mat_pos_quadro_programavel[k][l]=mat_pos_quadro_programavel[k-1][6]
+				}
+				senao
+				{
+					mat_pos_quadro_programavel[k][l]=mat_pos_quadro_programavel[k][l-1]
+				}
+			}
+		}
+	}
+	
 	funcao matriz_quadro_para_vetor_caminho()
 	{
 		inteiro aux=0
@@ -398,29 +479,33 @@ programa
 		comecou_a_rodar=verdadeiro
 		acha_char()
 		faca
-		{		
-			roda_char_()
-			acha_char()
-			se(verifica_tile())
+		{
+			se(nao eh_um_loop())
 			{
-				proximo_tile()
-				pode_andar=verdadeiro	
-			}
-			senao
-			{
-				pode_andar=falso
-			}
-			para(inteiro a=0; a<31; a++)
-			{
-				se(pode_andar)
+			
+				roda_char_()
+				acha_char()
+				se(verifica_tile())
 				{
-					mover()
+					proximo_tile()
+					pode_andar=verdadeiro	
 				}
-				se(a==16)//Essa Condição permite que o char não seja desenhado sobre um objeto antes de chegar no tile próximo
+				senao
 				{
-					acha_char()
+					pode_andar=falso
 				}
-				desenhar()
+				para(inteiro a=0; a<31; a++)
+				{
+					se(pode_andar)
+					{
+						mover()
+					}
+					se(a==16)//Essa Condição permite que o char não seja desenhado sobre um objeto antes de chegar no tile próximo
+					{
+						acha_char()
+					}
+					desenhar()
+				}			
 			}
 			acha_mouse()				
 			lado++
@@ -438,6 +523,28 @@ programa
 	{
 		posicao_x_mouse=mo.posicao_x()
 		posicao_y_mouse=mo.posicao_y()
+	}
+
+	funcao logico eh_um_loop()
+	{
+		se(caminhochar[lado]==COMANDO_LOOP_inicio)
+		{
+			pilha_de_posicao_dos_loops[topo_pilha_de_posicao]=lado
+			topo_pilha_de_posicao++
+			retorne verdadeiro
+		}
+		senao se(caminhochar[lado]%10==COMANDO_LOOP_fim)
+		{
+			se(caminhochar[lado]==COMANDO_LOOP_fim)
+			{
+				topo_pilha_de_posicao--
+				retorne verdadeiro
+			}
+			caminhochar[lado]-=10
+			lado=pilha_de_posicao_dos_loops[topo_pilha_de_posicao-1]
+			retorne verdadeiro
+		}
+		retorne falso
 	}
 
 	funcao roda_char_()
@@ -524,7 +631,7 @@ programa
 		          desenha_cerca(mapa_cerca_horizontal[i][j])
 		          desenha_cerca(mapa_cerca_vertical[i][j])
 				desenha_tile(mapa[i][j])
-				debug(mapa_char[i][j])
+//				debug(mapa_char[i][j])
 //				g.renderizar()
 //				u.aguarde(100)
 				se(posicao_maty==i e posicao_matx==j)
@@ -660,34 +767,30 @@ programa
 				fator_saiu_do_quadro=-tam_comandos[1]
 			}
 		}
+		se(s>fator_dentro_loop)
+		{
+			g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 1*tam_comandos[0], 2*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor)
+			s-=fator_dentro_loop
+		}
 		escolha(s)
 		{
 			caso  ESQUERDA : g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 0*tam_comandos[0], 0*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor) pare
 			caso  DESCE 	: g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 0*tam_comandos[0], 1*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor) pare 
 			caso  SOBE 	: g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 1*tam_comandos[0], 0*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor) pare 
 			caso  DIREITA 	: g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 1*tam_comandos[0], 1*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor) pare
+			caso COMANDO_LOOP_inicio : g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 0*tam_comandos[0], 2*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor) pare
 		}
-		se((mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro) e mat_pos_quadro_programavel[i][j]!=0)  e pegou_comando==falso)
-		{
-			g.desenhar_imagem(posicao_quadro[0]+(j*tam_comandos[0])+tam_comandos[0]-17, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, img_botao_excluir)
-			se(objeto_foi_clicado(verdadeiro))
-			{
-				objeto_clicado=BOTAO_EXCLUIR
-			}
-			se(objeto_foi_clicado(verdadeiro)==falso e objeto_clicado==BOTAO_EXCLUIR)
-			{
-				objeto_clicado=0
-				retirar_comando(i, j)
-			}
-		}
+		verifica_botoes_numero_loop(i, j, fator_saiu_por_cima, fator_saiu_do_quadro)
+		verifica_botao_excluir(i, j, fator_saiu_por_cima, fator_saiu_do_quadro)
 	}
 
 	funcao desenha_comandos()
 	{
-		g.desenhar_porcao_imagem(posicao_comandos[0]+0*tam_mat_comandos[0], posicao_comandos[1]+0*tam_mat_comandos[1], 0*tam_mat_comandos[0], 0*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
-		g.desenhar_porcao_imagem(posicao_comandos[0]+0*tam_mat_comandos[0], posicao_comandos[1]+1*tam_mat_comandos[1], 0*tam_mat_comandos[0], 1*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
-		g.desenhar_porcao_imagem(posicao_comandos[0]+1*tam_mat_comandos[0], posicao_comandos[1]+0*tam_mat_comandos[1], 1*tam_mat_comandos[0], 0*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
-		g.desenhar_porcao_imagem(posicao_comandos[0]+1*tam_mat_comandos[0], posicao_comandos[1]+1*tam_mat_comandos[1], 1*tam_mat_comandos[0], 1*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
+		g.desenhar_imagem(posicao_quadro[0]+tam_quadro_programavel[0]+tam_setas[0], posicao_quadro[1], img_comandos)
+//		g.desenhar_porcao_imagem(posicao_comandos[0]+0*tam_mat_comandos[0], posicao_comandos[1]+0*tam_mat_comandos[1], 0*tam_mat_comandos[0], 0*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
+//		g.desenhar_porcao_imagem(posicao_comandos[0]+0*tam_mat_comandos[0], posicao_comandos[1]+1*tam_mat_comandos[1], 0*tam_mat_comandos[0], 1*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
+//		g.desenhar_porcao_imagem(posicao_comandos[0]+1*tam_mat_comandos[0], posicao_comandos[1]+0*tam_mat_comandos[1], 1*tam_mat_comandos[0], 0*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
+//		g.desenhar_porcao_imagem(posicao_comandos[0]+1*tam_mat_comandos[0], posicao_comandos[1]+1*tam_mat_comandos[1], 1*tam_mat_comandos[0], 1*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
 	}
 
 	funcao desenha_comando_no_mouse()
@@ -695,19 +798,23 @@ programa
 		acha_mouse()
 		se(objeto_clicado==ESQUERDA)
 		{
-			g.desenhar_porcao_imagem(posicao_x_mouse-(tam_mat_comandos[0]/2), posicao_y_mouse-(tam_mat_comandos[1]/2), 0*tam_mat_comandos[0], 0*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
+			g.desenhar_porcao_imagem(posicao_x_mouse-(tam_mat_comandos[0]/2), posicao_y_mouse-(tam_mat_comandos[1]/2), 0*tam_mat_comandos[0]+35, 0*tam_mat_comandos[1]+50, tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
 		}
 		se(objeto_clicado==DESCE)
 		{
-			g.desenhar_porcao_imagem(posicao_x_mouse-(tam_mat_comandos[0]/2), posicao_y_mouse-(tam_mat_comandos[1]/2),  0*tam_mat_comandos[0], 1*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
+			g.desenhar_porcao_imagem(posicao_x_mouse-(tam_mat_comandos[0]/2), posicao_y_mouse-(tam_mat_comandos[1]/2),  0*tam_mat_comandos[0]+35, 1*tam_mat_comandos[1]+50, tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
 		}
 		se(objeto_clicado==SOBE)
 		{
-			g.desenhar_porcao_imagem(posicao_x_mouse-(tam_mat_comandos[0]/2), posicao_y_mouse-(tam_mat_comandos[1]/2), 1*tam_mat_comandos[0], 0*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
+			g.desenhar_porcao_imagem(posicao_x_mouse-(tam_mat_comandos[0]/2), posicao_y_mouse-(tam_mat_comandos[1]/2), 1*tam_mat_comandos[0]+35, 0*tam_mat_comandos[1]+50, tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
 		}
 		se(objeto_clicado==DIREITA)
 		{
-			g.desenhar_porcao_imagem(posicao_x_mouse-(tam_mat_comandos[0]/2), posicao_y_mouse-(tam_mat_comandos[1]/2), 1*tam_mat_comandos[0], 1*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
+			g.desenhar_porcao_imagem(posicao_x_mouse-(tam_mat_comandos[0]/2), posicao_y_mouse-(tam_mat_comandos[1]/2), 1*tam_mat_comandos[0]+35, 1*tam_mat_comandos[1]+50, tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
+		}
+		se(objeto_clicado==COMANDO_LOOP)
+		{
+			g.desenhar_porcao_imagem(posicao_x_mouse-(tam_mat_comandos[0]/2), posicao_y_mouse-(tam_mat_comandos[1]/2), 0*tam_mat_comandos[0], 2*tam_mat_comandos[1]+50, tam_mat_comandos[0]*3-20, tam_mat_comandos[1], img_comandos)
 		}
 	}
 	
@@ -729,6 +836,14 @@ programa
 		g.desenhar_porcao_imagem(posicao_botoes[0], posicao_botoes[2], 34, 0, tam_botoes[0], tam_botoes[1], img_botoes)
 		g.desenhar_porcao_imagem(posicao_botoes[1], posicao_botoes[2], 0, 0, tam_botoes[0], tam_botoes[1], img_botoes)
 	}
+
+	funcao desenha_numero_loop(inteiro x, inteiro y, cadeia texto)
+	{
+		g.definir_cor(g.COR_PRETO)
+		g.definir_tamanho_texto(18.0)
+		g.desenhar_texto(x, y, texto)
+		g.definir_cor(0x99FF66)
+	}
 	
 	funcao mexe_quadro()
 	{
@@ -746,6 +861,40 @@ programa
 			{
 			fator_mexer_quadro+=2
 			fator_mexer_matriz_comandos-=2
+			}
+		}
+	}
+
+	funcao verifica_botoes_numero_loop(inteiro i, inteiro j, real fator_saiu_por_cima, real fator_saiu_do_quadro)
+	{
+		se(mat_pos_quadro_programavel[i][j]%10==COMANDO_LOOP_fim)
+		{
+			g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 2*tam_comandos[0], 2*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor)
+			se(objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0])+11, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima+13, 16, 16)) e mat_pos_quadro_programavel[i][j]>10)
+			{
+				mat_pos_quadro_programavel[i][j]-=10
+			}
+			se(objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0])+46, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima+13, 16, 16)))
+			{
+				mat_pos_quadro_programavel[i][j]+=10
+			}
+			desenha_numero_loop(posicao_quadro[0]+(j*tam_comandos[0])+30, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima+6, tp.inteiro_para_cadeia(mat_pos_quadro_programavel[i][j]/10, 10))
+		}
+	}
+
+	funcao verifica_botao_excluir(inteiro i, inteiro j, real fator_saiu_por_cima, real fator_saiu_do_quadro)
+	{
+		se((mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro) e mat_pos_quadro_programavel[i][j]!=0)  e pegou_comando==falso)
+		{
+			g.desenhar_imagem(posicao_quadro[0]+(j*tam_comandos[0])+tam_comandos[0]-17, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, img_botao_excluir)
+			se(objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0])+tam_comandos[0]-17, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima,17.0, 17.0)))
+			{
+				objeto_clicado=BOTAO_EXCLUIR
+			}
+			se(objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0])+tam_comandos[0]-17, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima,17.0, 17.0))==falso e objeto_clicado==BOTAO_EXCLUIR)
+			{
+				objeto_clicado=0
+				retirar_comando(i, j)
 			}
 		}
 	}
@@ -785,6 +934,10 @@ programa
 				direcao_exemplo=leste
 				retorne verdadeiro
 		}
+		se(mouse_esta_sobre_objeto(posicao_comandos[0]-35, posicao_comandos[1]+2*tam_mat_comandos[1], tam_mat_comandos[0]*2, tam_mat_comandos[1]))
+		{
+				retorne verdadeiro
+		}
 		indice_imagem_exemplo=0
 		retorne falso
 	}
@@ -810,6 +963,11 @@ programa
 		{
 				pegou_comando=verdadeiro
 				retorne COMANDO_DIREITA
+		}
+		se(objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_comandos[0]-35, posicao_comandos[1]+2*tam_mat_comandos[1], tam_mat_comandos[0]*2, tam_mat_comandos[1])))
+		{		
+				pegou_comando=verdadeiro
+				retorne COMANDO_LOOP
 		}
 		retorne 0
 	}
@@ -1087,6 +1245,6 @@ programa
  * Esta seção do arquivo guarda informações do Portugol Studio.
  * Você pode apagá-la se estiver utilizando outro editor.
  * 
- * @POSICAO-CURSOR = 32444; 
- * @DOBRAMENTO-CODIGO = [57, 97, 140, 163, 167, 172, 185, 205, 217, 263, 275, 293, 308, 323, 340, 365, 380, 394, 436, 442, 471, 499, 545, 560, 569, 595, 602, 615, 640, 684, 692, 713, 726, 732, 752, 765, 791, 816, 828, 837, 844, 892, 916, 922, 928, 934, 940, 947, 960, 970, 976, 1000, 1015, 1029, 1036, 1050, 1070, 1077];
+ * @POSICAO-CURSOR = 23436; 
+ * @DOBRAMENTO-CODIGO = [63, 103, 146, 169, 173, 178, 191, 211, 223, 269, 281, 299, 314, 329, 346, 439, 461, 475, 521, 527, 549, 578, 606, 621, 652, 667, 676, 702, 709, 722, 786, 795, 820, 833, 839, 847, 867, 884, 901, 914, 944, 974, 986, 995, 1002, 1050, 1074, 1080, 1086, 1092, 1098, 1105, 1118, 1128, 1134, 1158, 1173, 1187, 1194, 1201, 1208, 1228, 1235];
  */
