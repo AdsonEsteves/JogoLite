@@ -20,6 +20,9 @@ programa
 		const inteiro oeste = 2
 		const inteiro norte = 0
 
+		const inteiro BOY = 1
+		const inteiro GIRL = 2
+
 		const inteiro COMANDO_DIREITA = 1
 		const inteiro COMANDO_DESCE = 2
 		const inteiro COMANDO_ESQUERDA = 3
@@ -49,7 +52,8 @@ programa
 		const real posicao_botoes[3]={420.0, 484.0, 557.0}
 		const real posicao_setas[3]={539.0, 390.0, 436.0}
 
-	inteiro imagem_boyf = 0, imagem_boya = 0, imagem_girlf = 0, imagem_girla = 0, imagem_boy=0, imagem_exemplo=0
+	inteiro tela_inicial=0, selecao_boy=0, selecao_girl=0
+	inteiro imagem_charf = 0, imagem_chara = 0, imagem_char=0, imagem_exemplo=0
 	inteiro img_mapa = 0, img_objects = 0, img_quadros =0, img_quadros_adjacentes=0,  img_comandos = 0,img_comandos_menor=0, img_botoes=0, img_setas=0, img_botao_excluir=0, img_numeros=0
 	real posicao_objeto_x = 0.0, posicao_objeto_y= 0.0, posicao_isometrica_objeto_x = 0.0, posicao_isometrica_objeto_y= 0.0
 	inteiro char_posicao_original_x_matriz=0, char_posicao_original_y_matriz=0
@@ -104,10 +108,10 @@ programa
 	inteiro nivel=1
 	cadeia nome_arquivo=""
 
-	inteiro sprite[4][10]={	{32,  80, 56,  80, 86,  80, 120,  80, 153,  80},
-						{32, 160, 56, 160, 86, 160, 120, 160, 153, 160},
-						{32, 236, 56, 236, 86, 236, 120, 236, 153, 236},
-						{32, 317, 56, 317, 86, 317, 120, 317, 153, 317}}
+	inteiro sprite[4][10]={	{32,  80, 62,  80, 91,  80, 123,  80, 154,  80},
+						{32, 160, 62, 160, 91, 160, 123, 160, 154, 160},
+						{32, 240, 62, 240, 91, 240, 123, 240, 154, 240},
+						{32, 320, 62, 320, 91, 320, 123, 320, 154, 320}}
 							
 
 	inteiro mapa[8][8]={{0, 0, 0, 0, 0, 0, 0, 0}, 
@@ -696,7 +700,14 @@ programa
 				se(mapa[i][j]==4)
 				{
 					posicao_objeto(j, i)
-					g.desenhar_porcao_imagem(posicao_isometrica_objeto_x+posicao_mapa[0], posicao_isometrica_objeto_y+posicao_mapa[1],  213, 0, 71, 125, img_objects)
+					se(posicao_matx==j e posicao_maty==i)
+					{
+						g.desenhar_porcao_imagem(posicao_isometrica_objeto_x+posicao_mapa[0], posicao_isometrica_objeto_y+posicao_mapa[1],  284, 0, 71, 125, img_objects)		
+					}
+					senao
+					{
+						g.desenhar_porcao_imagem(posicao_isometrica_objeto_x+posicao_mapa[0], posicao_isometrica_objeto_y+posicao_mapa[1],  213, 0, 71, 125, img_objects)	
+					}
 				}
 			}
 		}
@@ -746,10 +757,10 @@ programa
 
 	funcao desenha_char()
 	{
-		g.desenhar_porcao_imagem(char_isometrico_x+posicao_mapa_char[0]+55, char_isometrico_y+posicao_mapa_char[1]+115, sprite[direcao][indice_imagem*2],sprite[direcao][indice_imagem*2+1] , -32, -80, imagem_boy)
+		g.desenhar_porcao_imagem(char_isometrico_x+posicao_mapa_char[0]+55, char_isometrico_y+posicao_mapa_char[1]+115, sprite[direcao][indice_imagem*2],sprite[direcao][indice_imagem*2+1] , -32, -80, imagem_char)
 		se(comecou_a_rodar)
 		{	
-			se(imagemporturnos%8==0)
+			se(imagemporturnos%5==0)
 			{
 			indice_imagem = (indice_imagem + 1) % 5
 			}
@@ -930,7 +941,7 @@ programa
 		se(mat_pos_quadro_programavel[i][j]%10==COMANDO_LOOP_fim)
 		{
 			g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 2*tam_comandos[0], 2*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor)
-			se((objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0])+11, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima+13, 16, 16)) e mat_pos_quadro_programavel[i][j]>10) e nao pegou_comando)
+			se((objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0])+11, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima+13, 16, 16)) e mat_pos_quadro_programavel[i][j]%(fator_dentro_loop/10)>10) e nao pegou_comando)
 			{
 				mat_pos_quadro_programavel[i][j]-=10
 			}
@@ -1045,6 +1056,7 @@ programa
 	
 	funcao logico mouse_esta_sobre_objeto(real posicao_x_objeto, real posicao_y_objeto, real tamanho_x_objeto, real tamanho_y_objeto)
 	{
+		acha_mouse()
 		se(posicao_x_mouse>posicao_x_objeto e posicao_x_mouse<posicao_x_objeto+tamanho_x_objeto)
 		{
 			se(posicao_y_mouse>posicao_y_objeto e posicao_y_mouse<posicao_y_objeto+tamanho_y_objeto)
@@ -1337,16 +1349,65 @@ programa
 		limpar_caminho_matriz()
 		iniciar_jogo()
 	}
-	
-	funcao carregar_imagens()
+
+	funcao inteiro selecao_de_personagem()
 	{
-		cadeia pasta_boy = "./boy/"
-		cadeia pasta_girl = "./girl/"
+		inteiro char_selecionado=0
+		cadeia pasta_selecao="./selecao_personagem/"
+		
+		tela_inicial=g.carregar_imagem(pasta_selecao + "tela.png")
+		selecao_boy=g.carregar_imagem(pasta_selecao + "personagem_boy_selecao.png")
+		selecao_girl=g.carregar_imagem(pasta_selecao + "personagem_girl_selecao.png")
+
+		enquanto(char_selecionado==0)
+		{
+			g.desenhar_imagem(0, 0, tela_inicial)
+			se(mouse_esta_sobre_objeto(14.0, 135.0, 395.0, 465.0))
+			{
+				g.desenhar_imagem(14, 135, selecao_boy)
+				se(objeto_foi_clicado(verdadeiro))
+				{
+					objeto_clicado=BOY
+				}
+				se(nao objeto_foi_clicado(verdadeiro) e objeto_clicado==BOY)
+				{
+					objeto_clicado=0
+					retorne BOY
+				}
+			}
+			se(mouse_esta_sobre_objeto(487.0, 150.0, 298.0, 465.0))
+			{
+				g.desenhar_imagem(487, 150, selecao_girl)
+				se(objeto_foi_clicado(verdadeiro))
+				{
+					objeto_clicado=GIRL
+				}
+				se(nao objeto_foi_clicado(verdadeiro) e objeto_clicado==GIRL)
+				{
+					objeto_clicado=0
+					retorne GIRL
+				}
+			}
+			g.renderizar()
+		}
+	}
+	
+	funcao carregar_imagens(inteiro char)
+	{
+		cadeia pasta
+		se(char==1)
+		{
+			pasta = "./boy/"	
+		}
+		senao
+		{
+			pasta = "./girl/"
+		}
 		cadeia pasta_objetos = "./objetos/"
-		imagem_boyf = g.carregar_imagem(pasta_boy + "chars_boy1.png")
-		imagem_boya = g.carregar_imagem(pasta_boy + "chars_boy2.png")
-		imagem_boy = g.carregar_imagem(pasta_boy + "chars.png")
-		imagem_exemplo = g.carregar_imagem(pasta_boy + "chars.png")
+		imagem_charf = g.carregar_imagem(pasta + "char_f.png")
+		imagem_chara = g.carregar_imagem(pasta + "char_a.png")
+		imagem_char = g.carregar_imagem(pasta + "chars.png")
+		imagem_exemplo = g.carregar_imagem(pasta + "chars.png")
 		img_mapa = g.carregar_imagem("./mapa/mapa_vazio.png")
 		img_objects = g.carregar_imagem(pasta_objetos + "objects.png")
 		img_quadros = g.carregar_imagem(pasta_objetos + "quadro.png")
@@ -1368,8 +1429,8 @@ programa
 
 	funcao inicio()
 	{
-		carregar_imagens()
 		inicializar()
+		carregar_imagens(selecao_de_personagem())
 		telainicial()	
 	}
 }
@@ -1378,6 +1439,6 @@ programa
  * Esta seção do arquivo guarda informações do Portugol Studio.
  * Você pode apagá-la se estiver utilizando outro editor.
  * 
- * @POSICAO-CURSOR = 41430; 
- * @DOBRAMENTO-CODIGO = [66, 106, 149, 172, 176, 181, 194, 214, 226, 272, 284, 302, 317, 332, 349, 379, 456, 478, 499, 545, 551, 586, 615, 643, 658, 689, 704, 713, 739, 746, 759, 784, 823, 832, 857, 870, 876, 906, 926, 972, 985, 1015, 1045, 1057, 1066, 1073, 1121, 1145, 1151, 1157, 1163, 1169, 1176, 1189, 1199, 1290, 1305, 1319, 1326, 1333, 1340, 1361, 1368];
+ * @POSICAO-CURSOR = 23141; 
+ * @DOBRAMENTO-CODIGO = [70, 110, 116, 125, 134, 144, 153, 176, 180, 185, 198, 218, 230, 276, 288, 306, 321, 336, 353, 383, 460, 482, 503, 549, 555, 590, 619, 647, 662, 693, 715, 724, 750, 770, 795, 834, 843, 868, 881, 887, 917, 937, 959, 983, 996, 1026, 1056, 1069, 1078, 1085, 1133, 1157, 1163, 1169, 1175, 1181, 1188, 1201, 1211, 1217, 1240, 1302, 1317, 1331, 1338, 1345, 1352, 1394, 1422, 1429];
  */
