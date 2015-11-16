@@ -54,7 +54,7 @@ programa
 
 	inteiro tela_inicial=0, selecao_boy=0, selecao_girl=0
 	inteiro imagem_charf = 0, imagem_chara = 0, imagem_char=0, imagem_exemplo=0
-	inteiro img_mapa = 0, img_objects = 0, img_quadros =0, img_quadros_adjacentes=0,  img_comandos = 0,img_comandos_menor=0, img_botoes=0, img_setas=0, img_botao_excluir=0, img_numeros=0
+	inteiro img_mapa = 0, img_objects = 0, img_quadros =0, img_quadros_adjacentes=0,  img_comandos = 0,img_comandos_menor=0, img_botoes=0, img_setas=0, img_botao_excluir=0, img_numeros=0, img_quadro_pontuacao=0, img_borda=0
 	real posicao_objeto_x = 0.0, posicao_objeto_y= 0.0, posicao_isometrica_objeto_x = 0.0, posicao_isometrica_objeto_y= 0.0
 	inteiro char_posicao_original_x_matriz=0, char_posicao_original_y_matriz=0
 	real char_x=0.0, char_y=0.0, char_isometrico_x=0.0, char_isometrico_y=0.0
@@ -101,6 +101,9 @@ programa
 	logico chegou_no_fim=falso
 
 	inteiro posicao_x_mouse=0, posicao_y_mouse=0
+
+	inteiro tempo_inicial=0
+	inteiro pontos_tempo=0, pontos_instrucoes=0, pontos_deletados=0, pontos_limpou=0, pontos_play=0
 
 	inteiro digitos_por_tile=8, digitos_parte=2
 	inteiro NUMERO_LINHAS=8, NUMERO_COLUNAS=8
@@ -185,6 +188,7 @@ programa
 	
 	funcao iniciar_jogo()
 	{
+		tempo_inicial=u.tempo_decorrido()
 		limpar_campo()
 		abrir_novo_nivel()
 		definir_posicao_original()
@@ -314,6 +318,7 @@ programa
 		se((objeto_clicado==BOTAO_PLAY e mouse_esta_sobre_objeto(posicao_botoes[1], posicao_botoes[2], tam_botoes[0], tam_botoes[1])) e objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_botoes[1], posicao_botoes[2], tam_botoes[0], tam_botoes[1]))==falso)
 		{
 			objeto_clicado=0
+			pontos_play++
 			retorne verdadeiro
 		}
 		retorne falso
@@ -328,6 +333,7 @@ programa
 		}
 		se((objeto_clicado==BOTAO_RESET e mouse_esta_sobre_objeto(posicao_botoes[0], posicao_botoes[2], tam_botoes[0], tam_botoes[1])) e objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_botoes[0], posicao_botoes[2], tam_botoes[0], tam_botoes[1]))==falso)
 		{
+			pontos_limpou++
 			objeto_clicado=0
 			retorne verdadeiro
 		}
@@ -383,6 +389,7 @@ programa
 
 	funcao coloca_comando_no_quadro()
 	{
+		pontos_instrucoes++
 		para(inteiro i=0; i<tam_matriz_quadro[0]; i++)
 		{
 			para(inteiro j=0; j<tam_matriz_quadro[1]; j++)
@@ -412,7 +419,9 @@ programa
 								mat_pos_quadro_programavel[i][j]=COMANDO_LOOP_inicio
 								mat_pos_quadro_programavel[i+1][0]=COMANDO_LOOP_fim
 								retorne
-							}	
+							}
+							mat_pos_quadro_programavel[i][j]=objeto_clicado
+							retorne	
 						}
 						se(mat_pos_quadro_programavel[i][j+1]%10==COMANDO_LOOP_fim ou mat_pos_quadro_programavel[i][j+1]>100)
 						{
@@ -539,6 +548,7 @@ programa
 			lado++
 			
 		}enquanto(caminhochar[lado] != 0)
+		indice_imagem=0
 		lado=0
 		comecou_a_rodar=falso
 		se(venceu())
@@ -647,6 +657,7 @@ programa
 	
 	funcao desenhar()
 	{
+			pontos_tempo=u.tempo_decorrido()/1000-tempo_inicial/1000
 			g.limpar()
 			g.definir_cor(0x99FF66)
 			ajusta_matriz_cercas()
@@ -657,6 +668,7 @@ programa
 			desenha_exemplo()
 			desenha_botoes()
 			desenha_comando_no_mouse()
+			desenha_pontuacao()
 			g.renderizar()
 	}
 	
@@ -702,11 +714,11 @@ programa
 					posicao_objeto(j, i)
 					se(posicao_matx==j e posicao_maty==i)
 					{
-						g.desenhar_porcao_imagem(posicao_isometrica_objeto_x+posicao_mapa[0], posicao_isometrica_objeto_y+posicao_mapa[1],  284, 0, 71, 125, img_objects)		
+						g.desenhar_porcao_imagem(posicao_isometrica_objeto_x+posicao_mapa[0], posicao_isometrica_objeto_y+posicao_mapa[1]+2,  284, 0, 71, 125, img_objects)		
 					}
 					senao
 					{
-						g.desenhar_porcao_imagem(posicao_isometrica_objeto_x+posicao_mapa[0], posicao_isometrica_objeto_y+posicao_mapa[1],  213, 0, 71, 125, img_objects)	
+						g.desenhar_porcao_imagem(posicao_isometrica_objeto_x+posicao_mapa[0], posicao_isometrica_objeto_y+posicao_mapa[1]+2,  213, 0, 71, 125, img_objects)	
 					}
 				}
 			}
@@ -871,7 +883,7 @@ programa
 		g.desenhar_porcao_imagem(posicao_comandos[0]+tam_mat_comandos[0]+20, posicao_comandos[1]+tam_mat_comandos[1]+10, sprite[direcao_exemplo][indice_imagem_exemplo*2],sprite[direcao_exemplo][indice_imagem_exemplo*2+1] , -32, -80, imagem_exemplo)	
 		se(mouse_esta_sobre_comandos())
 		{
-			se(imagemporturnos_exemplo%8==0)
+			se(imagemporturnos_exemplo%4==0)
 			{
 			indice_imagem_exemplo = (indice_imagem_exemplo + 1) % 5
 			}
@@ -883,6 +895,21 @@ programa
 	{
 		g.desenhar_porcao_imagem(posicao_botoes[0], posicao_botoes[2], 34, 0, tam_botoes[0], tam_botoes[1], img_botoes)
 		g.desenhar_porcao_imagem(posicao_botoes[1], posicao_botoes[2], 0, 0, tam_botoes[0], tam_botoes[1], img_botoes)
+	}
+
+	funcao desenha_pontuacao()
+	{
+		cadeia texto_pontuacao="Tempo: "+ pontos_tempo +" | Instruções: "+ pontos_instrucoes + " | Deletados: "+ pontos_deletados + " | Limpou: "+ pontos_limpou + " | Plays: "+ pontos_play
+
+		real fator_centralizar=400
+
+		fator_centralizar-=(tx.numero_caracteres(texto_pontuacao)/2)*10.5
+		
+		g.desenhar_imagem(0, 0, img_quadro_pontuacao)
+		g.definir_cor(g.COR_PRETO)
+		g.definir_tamanho_texto(23.0)
+		g.desenhar_texto(fator_centralizar, 10, texto_pontuacao)	
+		g.definir_cor(0x99FF66)
 	}
 
 	funcao desenha_numero_loop(inteiro x, inteiro y, inteiro numero, real fator_saiu_do_quadro, real fator_saiu_por_cima)
@@ -968,6 +995,8 @@ programa
 			}
 			se(objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0])+tam_comandos[0]-17, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima,17.0, 17.0))==falso e objeto_clicado==BOTAO_EXCLUIR)
 			{
+				pontos_instrucoes--
+				pontos_deletados++
 				objeto_clicado=0
 				se(mat_pos_quadro_programavel[i][j]%10==COMANDO_LOOP_inicio ou mat_pos_quadro_programavel[i][j]%10==COMANDO_LOOP_fim)
 				{
@@ -1310,7 +1339,8 @@ programa
 		{
 			para(inteiro j=0; j<u.numero_colunas(mat_pos_quadro_programavel); j++)
 			{
-					mat_pos_quadro_programavel[i][j]=0
+				pontos_instrucoes=0
+				mat_pos_quadro_programavel[i][j]=0
 			}
 		}
 	}
@@ -1391,8 +1421,8 @@ programa
 			g.renderizar()
 		}
 	}
-	
-	funcao carregar_imagens(inteiro char)
+
+	funcao carregar_personagem(inteiro char)
 	{
 		cadeia pasta
 		se(char==1)
@@ -1403,11 +1433,17 @@ programa
 		{
 			pasta = "./girl/"
 		}
-		cadeia pasta_objetos = "./objetos/"
 		imagem_charf = g.carregar_imagem(pasta + "char_f.png")
 		imagem_chara = g.carregar_imagem(pasta + "char_a.png")
 		imagem_char = g.carregar_imagem(pasta + "chars.png")
 		imagem_exemplo = g.carregar_imagem(pasta + "chars.png")
+		
+	}
+	
+	funcao carregar_imagens()
+	{
+		
+		cadeia pasta_objetos = "./objetos/"
 		img_mapa = g.carregar_imagem("./mapa/mapa_vazio.png")
 		img_objects = g.carregar_imagem(pasta_objetos + "objects.png")
 		img_quadros = g.carregar_imagem(pasta_objetos + "quadro.png")
@@ -1418,6 +1454,8 @@ programa
 		img_botao_excluir = g.carregar_imagem(pasta_objetos + "botao_excluir.png")
 		img_setas = g.carregar_imagem(pasta_objetos + "setas.png")
 		img_numeros = g.carregar_imagem(pasta_objetos + "numeros.png")
+		img_quadro_pontuacao = g.carregar_imagem(pasta_objetos + "quadro_pontuacao.png")
+		img_borda=g.carregar_imagem(pasta_objetos + "comando_ativado_borda.png")
 	}
 
 	funcao inicializar()
@@ -1430,7 +1468,8 @@ programa
 	funcao inicio()
 	{
 		inicializar()
-		carregar_imagens(selecao_de_personagem())
+		carregar_imagens()
+		carregar_personagem(selecao_de_personagem())
 		telainicial()	
 	}
 }
@@ -1439,6 +1478,6 @@ programa
  * Esta seção do arquivo guarda informações do Portugol Studio.
  * Você pode apagá-la se estiver utilizando outro editor.
  * 
- * @POSICAO-CURSOR = 23141; 
- * @DOBRAMENTO-CODIGO = [70, 110, 116, 125, 134, 144, 153, 176, 180, 185, 198, 218, 230, 276, 288, 306, 321, 336, 353, 383, 460, 482, 503, 549, 555, 590, 619, 647, 662, 693, 715, 724, 750, 770, 795, 834, 843, 868, 881, 887, 917, 937, 959, 983, 996, 1026, 1056, 1069, 1078, 1085, 1133, 1157, 1163, 1169, 1175, 1181, 1188, 1201, 1211, 1217, 1240, 1302, 1317, 1331, 1338, 1345, 1352, 1394, 1422, 1429];
+ * @POSICAO-CURSOR = 46656; 
+ * @DOBRAMENTO-CODIGO = [70, 119, 128, 137, 147, 156, 179, 183, 188, 202, 222, 234, 280, 292, 310, 326, 342, 359, 389, 469, 491, 512, 559, 565, 600, 629, 657, 674, 705, 727, 736, 762, 769, 782, 807, 846, 855, 880, 893, 899, 914, 944, 964, 986, 1012, 1025, 1055, 1085, 1098, 1107, 1114, 1162, 1186, 1192, 1198, 1204, 1210, 1217, 1230, 1240, 1246, 1269, 1331, 1347, 1361, 1368, 1375];
  */
