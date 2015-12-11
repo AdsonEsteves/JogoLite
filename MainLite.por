@@ -629,20 +629,24 @@ programa
 	{
 		//verifica se chegou ao fim dos comandos colocados no quadro
 		se(pos_quadro_x==tam_matriz_quadro[1]-1)
-		{			
+		{
+			//se chegou ao fim da linha vai pra próxima			
 			pos_quadro_y++
 			pos_quadro_x=0
 		}
 		senao se(pos_quadro_y==tam_matriz_quadro[0]-1 e pos_quadro_x==tam_matriz_quadro[1]-1)
 		{
+			//se chegou a ultima linha e ultima coluna termina
 			retorne verdadeiro
 		}
 		senao
 		{
+			//passa pra proxima coluna
 			pos_quadro_x++
 		}
 		se(mat_pos_quadro_programavel[pos_quadro_y][pos_quadro_x]==0)
 		{
+			//se nao tem comandos temrina
 			retorne verdadeiro
 		}
 		retorne falso
@@ -650,6 +654,7 @@ programa
 	
 	funcao roda_char_()
 	{
+			//direciona o personagem ao lado do comando atual
 			se(mat_pos_quadro_programavel[pos_quadro_y][pos_quadro_x]%10==SOBE)
 			{
 				incrementohorizontal = 0.0
@@ -679,6 +684,8 @@ programa
 
 	funcao ajusta_matriz_cercas()
 	{
+		//extende os tiles das cercas para cobrirem o tamanho que precisam
+		//as cercas são divididas em 2 e 4 partes
 		para(inteiro i=0; i<9; i++)
 		{
 			para(inteiro j=0; j<8; j++)
@@ -707,6 +714,7 @@ programa
 	
 	funcao desenhar()
 	{
+			//funções de desenho
 			pontos_tempo=u.tempo_decorrido()/1000-tempo_inicial/1000
 			g.limpar()
 			g.definir_cor(0x99FF66)
@@ -724,12 +732,13 @@ programa
 	
 	funcao desenha_mapa()
 	{
+		//desenha o mapa e seus objetos
 		g.desenhar_imagem(154, 88, img_mapa)
 		desenha_saida()
 		para(inteiro i=0; i<8;i++)
 		{
 			para(inteiro j=0;j<8;j++)
-			{
+			{	//passa por todos os mapas para desenhar cada tile necessário
 				posicao_objeto(j, i)
 		          desenha_cerca(mapa_cerca_horizontal[i][j])
 		          desenha_cerca(mapa_cerca_vertical[i][j])
@@ -755,6 +764,7 @@ programa
 
 	funcao desenha_saida()
 	{
+		//a saida precisa ser desenhada antes de tudo, pois como esta presa no chao todo o objeto sobrepoe ela
 		para(inteiro i=0; i<8;i++)
 		{
 			para(inteiro j=0;j<8;j++)
@@ -777,6 +787,7 @@ programa
 
 	funcao desenha_tile(inteiro s)
 	{
+		//desenha objeto no tile dependendo do numero que estiver no mapa
 		escolha(s){
 			caso  1 : g.desenhar_porcao_imagem(posicao_isometrica_objeto_x+posicao_mapa[0], posicao_isometrica_objeto_y+posicao_mapa[1],  142, 0, 71, 125, img_objects) pare 
 			caso  2 : g.desenhar_porcao_imagem(posicao_isometrica_objeto_x+posicao_mapa[0], posicao_isometrica_objeto_y+posicao_mapa[1],    0, 0, 71, 117, img_objects) pare 
@@ -786,6 +797,7 @@ programa
 
 	funcao desenha_cerca(inteiro s)
 	{
+		//desenha a cerca que estiver no tile do mapa de cercas
 		escolha(s)
 		{
 			//Os números para saber o quanto cortar da cerca e quanto levantar ela, foram baseados em tentativa e erro
@@ -812,13 +824,16 @@ programa
 	
 	funcao posicao_objeto(inteiro x, inteiro y)
 	{
+		//consegue as posições em 2D, e transforma em posições em isometrico para o objeto
 		posicao_objeto_x=x*tamtile[0]
 		posicao_objeto_y=y*tamtile[1]
-		doisdparaiso_o()
+		objeto_doisD_para_isometrico()
 	}
 
 	funcao desenha_char()
 	{
+		//desenha o char a partir do mapa de posições dos sprites do char declarado no começo, com isso, posições e direção, pode-se trocar as variaveis da posição
+		//da imagem do char na folha de sprites de acordo com a direção que estiver o char atualmente
 		g.desenhar_porcao_imagem(char_isometrico_x+posicao_mapa_char[0]+55, char_isometrico_y+posicao_mapa_char[1]+115, sprite[direcao][indice_imagem*2],sprite[direcao][indice_imagem*2+1] , -32, -80, imagem_char)
 		se(comecou_a_rodar)
 		{	
@@ -890,21 +905,20 @@ programa
 			caso  DIREITA 	: g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 1*tam_comandos[0], 1*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor) pare
 			caso COMANDO_LOOP_inicio : g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 0*tam_comandos[0], 2*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor) pare
 		}
+		se(comecou_a_rodar==falso)
+		{
+		verifica_botao_excluir(i, j, fator_saiu_por_cima, fator_saiu_do_quadro)			
+		}
 		verifica_botoes_numero_loop(i, j, fator_saiu_por_cima, fator_saiu_do_quadro)
-		verifica_botao_excluir(i, j, fator_saiu_por_cima, fator_saiu_do_quadro)
 		se(j==pos_quadro_x e i==pos_quadro_y e comecou_a_rodar==verdadeiro)
 		{
-			g.desenhar_imagem(posicao_quadro[0]+(pos_quadro_x*tam_comandos[0]), posicao_quadro[1]+(pos_quadro_y*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, img_borda)	
+			g.desenhar_porcao_imagem(posicao_quadro[0]+(pos_quadro_x*tam_comandos[0]), posicao_quadro[1]+(pos_quadro_y*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 0, 0-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_borda)	
 		}
 	}
 	
 	funcao desenha_comandos()
 	{
 		g.desenhar_imagem(posicao_quadro[0]+tam_quadro_programavel[0]+tam_setas[0], posicao_quadro[1], img_comandos)
-//		g.desenhar_porcao_imagem(posicao_comandos[0]+0*tam_mat_comandos[0], posicao_comandos[1]+0*tam_mat_comandos[1], 0*tam_mat_comandos[0], 0*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
-//		g.desenhar_porcao_imagem(posicao_comandos[0]+0*tam_mat_comandos[0], posicao_comandos[1]+1*tam_mat_comandos[1], 0*tam_mat_comandos[0], 1*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
-//		g.desenhar_porcao_imagem(posicao_comandos[0]+1*tam_mat_comandos[0], posicao_comandos[1]+0*tam_mat_comandos[1], 1*tam_mat_comandos[0], 0*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
-//		g.desenhar_porcao_imagem(posicao_comandos[0]+1*tam_mat_comandos[0], posicao_comandos[1]+1*tam_mat_comandos[1], 1*tam_mat_comandos[0], 1*tam_mat_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1], img_comandos)
 	}
 
 	funcao desenha_comando_no_mouse()
@@ -1022,11 +1036,11 @@ programa
 		se(mat_pos_quadro_programavel[i][j]%10==COMANDO_LOOP_fim)
 		{
 			g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 2*tam_comandos[0], 2*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor)
-			se((objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0])+11, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima+13, 16, 16)) e mat_pos_quadro_programavel[i][j]%(fator_dentro_loop/10)>10) e nao pegou_comando)
+			se((objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0])+11, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima+13, 16, 16)) e mat_pos_quadro_programavel[i][j]%(fator_dentro_loop/10)>10) e nao pegou_comando e comecou_a_rodar==falso)
 			{
 				mat_pos_quadro_programavel[i][j]-=10
 			}
-			se((objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0])+46, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima+13, 16, 16))) e nao pegou_comando)
+			se((objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0])+46, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima+13, 16, 16))) e nao pegou_comando e comecou_a_rodar==falso)
 			{
 				mat_pos_quadro_programavel[i][j]+=10
 			}
@@ -1244,7 +1258,7 @@ programa
  		posicao_objeto_y = (2 * posicao_isometrica_objeto_y - posicao_isometrica_objeto_x) / 2
 	}
 
-	funcao doisdparaiso_o()
+	funcao objeto_doisD_para_isometrico()
 	{
 		posicao_isometrica_objeto_x = posicao_objeto_x - posicao_objeto_y
   		posicao_isometrica_objeto_y = (posicao_objeto_x + posicao_objeto_y) /1.75
@@ -1531,6 +1545,6 @@ programa
  * Esta seção do arquivo guarda informações do Portugol Studio.
  * Você pode apagá-la se estiver utilizando outro editor.
  * 
- * @POSICAO-CURSOR = 21568; 
- * @DOBRAMENTO-CODIGO = [135, 144, 153, 164, 173, 196, 200, 205, 220, 241, 253, 302, 315, 332, 350, 368, 387, 418, 508, 531, 578, 585, 650, 679, 707, 724, 755, 777, 786, 812, 819, 832, 857, 900, 909, 934, 947, 953, 968, 998, 1018, 1040, 1066, 1079, 1109, 1139, 1152, 1161, 1168, 1216, 1240, 1246, 1252, 1258, 1264, 1271, 1284, 1294, 1300, 1323, 1386, 1398, 1414, 1421, 1428, 1435, 1477, 1495, 1513];
+ * @POSICAO-CURSOR = 39498; 
+ * @DOBRAMENTO-CODIGO = [135, 144, 153, 164, 173, 196, 200, 205, 220, 241, 253, 302, 315, 332, 350, 368, 387, 418, 508, 531, 578, 585, 627, 654, 684, 714, 732, 764, 787, 797, 824, 832, 847, 872, 918, 923, 948, 961, 967, 982, 1012, 1054, 1080, 1093, 1123, 1153, 1166, 1175, 1182, 1230, 1254, 1260, 1266, 1272, 1278, 1285, 1298, 1308, 1314, 1337, 1400, 1412, 1428, 1435, 1442, 1449, 1491, 1509, 1527, 1534];
  */
