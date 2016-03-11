@@ -1,3 +1,30 @@
+/* CLIQUE NO SINAL DE "+", À ESQUERDA, PARA EXIBIR A DESCRIÇÃO DO EXEMPLO
+ *  
+ * Copyright (C) 2016 - UNIVALI - Universidade do Vale do Itajaí
+ * 
+ * Este arquivo de código fonte é livre para utilização, cópia e/ou modificação
+ * desde que este cabeçalho, contendo os direitos autorais e a descrição do programa, 
+ * seja mantido.
+ * 
+ * Se tiver dificuldade em compreender este exemplo, acesse as vídeoaulas do Portugol 
+ * Studio para auxiliá-lo:
+ * 
+ * https://www.youtube.com/watch?v=K02TnB3IGnQ&list=PLb9yvNDCid3jQAEbNoPHtPR0SWwmRSM-t
+ * 
+ * Descrição:
+ * 
+ * 	Este exemplo é um jogo de programar o caminho de um personagem
+ * 	escrito em Portugol. O exemplo demonstra como utilizar algumas das bibliotecas 
+ * 	existentes no Portugol. Neste exemplo, também é possível ver algumas técnicas 
+ * 	utilizadas na criação de jogos.
+ * 	
+ * Autores:
+ * 
+ * 	Adson Marques da Silva Esteves(shiandson@gmail.com)
+ * 	
+ * Data: 11/03/2016
+ */
+
 programa
 {
 	inclua biblioteca Graficos --> g
@@ -871,10 +898,13 @@ programa
 	}
 	
 	funcao desenha_comando_no_quadro(inteiro s, inteiro i, inteiro j)
-	{
+	{	
+		//desenha os comandos do quadro que forem sendo colocados
 		real fator_saiu_do_quadro=0.0
 		real fator_saiu_por_cima=0.0
-		
+		//os calculos abaixo definem se um comando está dentro ou foram da área do quadro quando ele é movido pelas setas no programa
+		//os fatores vão ser usados na hora de imprimir os comandos no quadro, pois eles definirão o quanto será das imagens caso
+		//apenas uma parte delas será necessária ser desenhada
 		se((i*(tam_comandos[1])+fator_mexer_matriz_comandos)<0)
 		{
 			fator_saiu_do_quadro=(i*(tam_comandos[1])+fator_mexer_matriz_comandos)
@@ -892,11 +922,13 @@ programa
 				fator_saiu_do_quadro=-tam_comandos[1]
 			}
 		}
+		//a condição abaixo define se um comando está dentro do loop e desenha um risco atras dele para dar a impressão de continuidade do loop
 		se(s>fator_dentro_loop)
 		{
 			g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 1*tam_comandos[0], 2*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor)
 			s-=fator_dentro_loop
 		}
+		//a escolha abaixo desenha o comando a partir de sua posição e o quanto está dentro ou fora do quadro
 		escolha(s)
 		{
 			caso  ESQUERDA : g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 0*tam_comandos[0], 0*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor) pare
@@ -905,6 +937,7 @@ programa
 			caso  DIREITA 	: g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 1*tam_comandos[0], 1*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor) pare
 			caso COMANDO_LOOP_inicio : g.desenhar_porcao_imagem(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, 0*tam_comandos[0], 2*tam_comandos[1]-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro, img_comandos_menor) pare
 		}
+		//verificam se os botões excluir e numero de loops foram clicados e modifica quadro
 		se(comecou_a_rodar==falso)
 		{
 		verifica_botao_excluir(i, j, fator_saiu_por_cima, fator_saiu_do_quadro)			
@@ -918,11 +951,13 @@ programa
 	
 	funcao desenha_comandos()
 	{
+		//desenha a imagem dos comandos que podem ser pegos(são os comandos que ficam com o personagem à direita)
 		g.desenhar_imagem(posicao_quadro[0]+tam_quadro_programavel[0]+tam_setas[0], posicao_quadro[1], img_comandos)
 	}
 
 	funcao desenha_comando_no_mouse()
 	{
+		//desenha o objeto que foi clicado e está sendo arrastado pelo mouse, no mouse
 		acha_mouse()
 		se(objeto_clicado==ESQUERDA)
 		{
@@ -948,6 +983,7 @@ programa
 	
 	funcao desenha_exemplo()
 	{
+		//desenha o personagem exemplo, que fica junto ao quadro de comandos à direita
 		g.desenhar_porcao_imagem(posicao_comandos[0]+tam_mat_comandos[0]+20, posicao_comandos[1]+tam_mat_comandos[1]+10, sprite[direcao_exemplo][indice_imagem_exemplo*2],sprite[direcao_exemplo][indice_imagem_exemplo*2+1] , -32, -80, imagem_exemplo)	
 		se(mouse_esta_sobre_comandos())
 		{
@@ -961,16 +997,17 @@ programa
 
 	funcao desenha_botoes()
 	{
+		//desenha os botoes play e excluir
 		g.desenhar_porcao_imagem(posicao_botoes[0], posicao_botoes[2], 34, 0, tam_botoes[0], tam_botoes[1], img_botoes)
 		g.desenhar_porcao_imagem(posicao_botoes[1], posicao_botoes[2], 0, 0, tam_botoes[0], tam_botoes[1], img_botoes)
 	}
 
 	funcao desenha_pontuacao()
 	{
+		//desenha as pontuações no topo
 		cadeia texto_pontuacao="Tempo: "+ pontos_tempo +" | Instruções: "+ pontos_instrucoes +" | Loops: "+pontos_loops +" | Deletados: "+ pontos_deletados + " | Limpou: "+ pontos_limpou + " | Plays: "+ pontos_play
 
 		inteiro fator_centralizar=400
-
 		fator_centralizar-=(tx.numero_caracteres(texto_pontuacao)/2)*9.5
 		
 		g.desenhar_imagem(0, 0, img_quadro_pontuacao)
@@ -982,16 +1019,20 @@ programa
 
 	funcao desenha_numero_loop(inteiro x, inteiro y, inteiro numero, real fator_saiu_do_quadro, real fator_saiu_por_cima)
 	{
+		//descobre o numero do loop, e o desenha ao lado do próprio
+		
 		inteiro numeros[]={0,0,0,0}, j
 		inteiro fator_centralizar=0, fator_separar=0
 
 		para(inteiro i=u.numero_elementos(numeros)-1; i>=0;i--)
 		{
+			//é retirado cada final do numero recebido e colocado em um vetor, para cada um ser desenhado separadamente
 			numeros[i]=numero%10
 			numero=numero/10
 		}
 		para(j=0; j<u.numero_elementos(numeros); j++)
 		{
+			//necessário para o desenho não começar com zeros na frente, o j terá a posição certa a se começar a desenhar
 			se(numeros[j] != 0)
 			{
 				pare
@@ -1000,7 +1041,7 @@ programa
 		
 		se(j<u.numero_elementos(numeros) e j !=0)
 		{
-		fator_centralizar=10/j
+			fator_centralizar=10/j
 		}
 		
 		para(j; j<u.numero_elementos(numeros);j++)
@@ -1012,26 +1053,29 @@ programa
 	
 	funcao mexe_quadro()
 	{
+		//define quanto os comandos irão se mexer e quanto o quadro também irá.
+		//se está no limite do inicio ou do fim do quadro, ambos não poderão se mover
 		se(fator_mexer_matriz_comandos<0 )
 		{
 			se(esta_clicando_na_seta()==SOBE)
 			{
-			fator_mexer_quadro-=2
-			fator_mexer_matriz_comandos+=2
+				fator_mexer_quadro-=2
+				fator_mexer_matriz_comandos+=2
 			}
 		}
 		se((21*(tam_comandos[1])+fator_mexer_matriz_comandos)>tam_quadro_programavel[1]-tam_comandos[1])
 		{
 			se(esta_clicando_na_seta()==DESCE)
 			{
-			fator_mexer_quadro+=2
-			fator_mexer_matriz_comandos-=2
+				fator_mexer_quadro+=2
+				fator_mexer_matriz_comandos-=2
 			}
 		}
 	}
 
 	funcao verifica_botoes_numero_loop(inteiro i, inteiro j, real fator_saiu_por_cima, real fator_saiu_do_quadro)
 	{
+		//verifica se o comando do fim do loop foi clicado nos botões + e -, e desenha o for necessário.
 		inteiro numero=mat_pos_quadro_programavel[i][j]
 		se(mat_pos_quadro_programavel[i][j]%10==COMANDO_LOOP_fim)
 		{
@@ -1054,6 +1098,8 @@ programa
 
 	funcao verifica_botao_excluir(inteiro i, inteiro j, real fator_saiu_por_cima, real fator_saiu_do_quadro)
 	{
+		//verifica se o x do comando foi clicado e assim tenta exclui-lo do local, se um loop, ele também levará o começo do loop
+		//porém não será retirado os comandos dentro do loop
 		se((mouse_esta_sobre_objeto(posicao_quadro[0]+(j*tam_comandos[0]), posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, tam_comandos[0], tam_comandos[1]+fator_saiu_do_quadro) e mat_pos_quadro_programavel[i][j]!=0)  e pegou_comando==falso)
 		{
 			g.desenhar_imagem(posicao_quadro[0]+(j*tam_comandos[0])+tam_comandos[0]-17, posicao_quadro[1]+(i*(tam_comandos[1])+fator_mexer_matriz_comandos)-fator_saiu_por_cima, img_botao_excluir)
@@ -1080,6 +1126,7 @@ programa
 	
 	funcao inteiro esta_clicando_na_seta()
 	{
+		//retorna se alguma seta que move o quadro foi clicada
 		se(objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_setas[0], posicao_setas[1], tam_setas[0], tam_setas[1])))
 		{
 			retorne SOBE
@@ -1093,6 +1140,7 @@ programa
 	
 	funcao logico mouse_esta_sobre_comandos()
 	{
+		//retorna se o mouse está sobre algum dos comandos à direita
 		se(mouse_esta_sobre_objeto(posicao_comandos[0], posicao_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1]))
 		{
 				direcao_exemplo=oeste
@@ -1123,6 +1171,7 @@ programa
 
 	funcao inteiro comando_que_foi_clicado()
 	{
+		//verifica se algum comando foi clicado, e retorna o qual
 		se(objeto_foi_clicado(mouse_esta_sobre_objeto(posicao_comandos[0], posicao_comandos[1], tam_mat_comandos[0], tam_mat_comandos[1])))
 		{
 				pegou_comando=verdadeiro
@@ -1153,6 +1202,7 @@ programa
 	
 	funcao logico mouse_esta_sobre_objeto(real posicao_x_objeto, real posicao_y_objeto, real tamanho_x_objeto, real tamanho_y_objeto)
 	{
+		//funcao generica que retorna se o mouse está sobre um objeto, precisa-se saber a posição e o tamanho do objeto
 		acha_mouse()
 		se(posicao_x_mouse>posicao_x_objeto e posicao_x_mouse<posicao_x_objeto+tamanho_x_objeto)
 		{
@@ -1166,6 +1216,8 @@ programa
 
 	funcao logico objeto_foi_clicado(logico esta_no_objeto)
 	{
+		//função genérica que retorna se o objeto foi clicado, precisa-se da confirmação se o mouse está sobre o objeto
+		//utilizada normalmente com a função mouse_esta_sobre_objeto()
 		se(esta_no_objeto e mo.botao_pressionado(mo.BOTAO_ESQUERDO))
 		{
 			retorne verdadeiro
@@ -1175,6 +1227,7 @@ programa
 	
 	funcao logico verifica_tile()
 	{
+		//verifica o tile
 		acha_char()
 		retorne verifica_proximo(posicao_maty, posicao_matx)
 		
@@ -1182,6 +1235,7 @@ programa
 
 	funcao logico verifica_proximo(inteiro y, inteiro x)
 	{
+		//verifica se o próximo tile está apto para andar
 			se(mat_pos_quadro_programavel[pos_quadro_y][pos_quadro_x]%10==DIREITA)
 			{
 				se(x+1<8)
@@ -1230,6 +1284,7 @@ programa
 	
 	funcao proximo_tile()
 	{
+		//faz o char andar para o próximo tile
 		se(mat_pos_quadro_programavel[pos_quadro_y][pos_quadro_x]%10==DIREITA)
 		{
 			mapa_char[posicao_maty][posicao_matx+1]=1
@@ -1252,39 +1307,31 @@ programa
 		}	
 	}
 	
-	funcao isoparadoisd_o()
-	{
-  		posicao_objeto_x = (2 * posicao_isometrica_objeto_y + posicao_isometrica_objeto_x) / 2
- 		posicao_objeto_y = (2 * posicao_isometrica_objeto_y - posicao_isometrica_objeto_x) / 2
-	}
-
 	funcao objeto_doisD_para_isometrico()
 	{
+		//transforma as posições 2D de um objeto, para Isometrica
 		posicao_isometrica_objeto_x = posicao_objeto_x - posicao_objeto_y
   		posicao_isometrica_objeto_y = (posicao_objeto_x + posicao_objeto_y) /1.75
 	}
 	
-	funcao isoparadoisd()
+	funcao char_doisD_para_isometrico()
 	{
-  		char_x = (2 * char_isometrico_y + char_isometrico_x) / 2
- 		char_y = (2 * char_isometrico_y - char_isometrico_x) / 2
-	}
-
-	funcao doisdparaiso()
-	{
+		//transforma as posições do char de 2D para isometrica
 		char_isometrico_x = char_x - char_y
   		char_isometrico_y = (char_x + char_y) / 1.75
 	}
 
 	funcao mover()
 	{
+		//faz o incrmento na posição da imagem do char
 		char_x+= incrementohorizontal
 		char_y+= incrementovertical
-		doisdparaiso()
+		char_doisD_para_isometrico()
 	}
 
 	funcao acha_char()
 	{
+		//encontra a posição do char e a coloca em variaveis
 		para(inteiro i=0; i<8; i++){
 				para(inteiro j=0; j<8; j++){
 					se(mapa_char[i][j]==1)
@@ -1298,6 +1345,7 @@ programa
 
 	funcao logico venceu()
 	{
+		//verifica se o char chegou ao fim do mapa
 		acha_char()
 		se(mapa[posicao_maty][posicao_matx]==4)
 		{
@@ -1308,12 +1356,14 @@ programa
 	
 	funcao resetar()
 	{
+		//retorna o char ao inicio e limpa a matriz de comandos
 		posicao_inicial()
 		limpar_caminho_matriz()
 	}
 
 	funcao retirar_comando(inteiro i, inteiro j)
 	{
+		//função que retira um comando do quadro
 		para(; i<tam_matriz_quadro[0]; i++)
 		{
 			para(; j<tam_matriz_quadro[1]; j++)
@@ -1337,6 +1387,8 @@ programa
 
 	funcao retirar_loop(inteiro i, inteiro j, inteiro tipo_a_deletar)
 	{
+		//função que retira um loop do quadro.
+		//o inicio e o final do loop são retirados sem retirar os comandos dentre ele
 		inteiro pular_loop_interno=0
 		retirar_comando(i, j)
 		pontos_loops--
@@ -1400,10 +1452,11 @@ programa
 	
 	funcao limpar_caminho_matriz()
 	{
+		//limpa o quadro de comandos
 		para(inteiro i=0; i<u.numero_linhas(mat_pos_quadro_programavel); i++)
 		{
 			para(inteiro j=0; j<u.numero_colunas(mat_pos_quadro_programavel); j++)
-			{
+			{				
 				pontos_instrucoes=0
 				mat_pos_quadro_programavel[i][j]=0
 			}
@@ -1412,6 +1465,7 @@ programa
 
 	funcao posicao_inicial()
 	{
+		//retorna o char para sua posição inicial
 		acha_char()
 		
 		char_x=char_posicao_original_x_matriz*tamtile[0]
@@ -1423,11 +1477,12 @@ programa
 		pos_quadro_x=0
 		pos_quadro_y=0
 		
-		doisdparaiso()
+		char_doisD_para_isometrico()
 	}
 
 	funcao definir_posicao_original()
 	{
+		//define a posição inicial do char
 		acha_char()
 		char_posicao_original_x_matriz=posicao_matx
 		char_posicao_original_y_matriz=posicao_maty
@@ -1435,6 +1490,8 @@ programa
 
 	funcao debug(inteiro s)
 	{
+			//essa função permite desenhar os numeros que lhe forem enviados
+			//ela é chamada no desenho do campo, é normalmente utilizada para verificar se os numeros nas matrizes estão certos
 			g.definir_cor(g.COR_PRETO)
 			g.desenhar_texto(posicao_isometrica_objeto_x+posicao_mapa[0], posicao_isometrica_objeto_y+posicao_mapa[1], tp.inteiro_para_cadeia(s, 10))	
 			g.definir_cor(0x99FF66)	
@@ -1442,6 +1499,7 @@ programa
 
 	funcao proxima_fase()
 	{
+		//inicia próxima fase
 		nivel++
 		limpar_caminho_matriz()
 		iniciar_jogo()
@@ -1449,6 +1507,8 @@ programa
 
 	funcao inteiro selecao_de_personagem()
 	{
+		//desenha a tela de seleção de persoangem
+		//E retorna o personagem selecionado
 		inteiro char_selecionado=0
 		cadeia pasta_selecao="./selecao_personagem/"
 		
@@ -1491,6 +1551,7 @@ programa
 
 	funcao carregar_personagem(inteiro char)
 	{
+		//carrega as imagens do persoangem selecionado
 		cadeia pasta
 		se(char==1)
 		{
@@ -1509,7 +1570,7 @@ programa
 	
 	funcao carregar_imagens()
 	{
-		
+		//carrega as imagens necessárias
 		cadeia pasta_objetos = "./objetos/"
 		img_mapa = g.carregar_imagem("./mapa/mapa_vazio.png")
 		img_objects = g.carregar_imagem(pasta_objetos + "objects.png")
@@ -1527,6 +1588,7 @@ programa
 
 	funcao inicializar()
 	{
+		//inicia o modo gráfico
 		g.iniciar_modo_grafico(verdadeiro)
 		g.definir_dimensoes_janela(800, 600)
 		g.definir_titulo_janela("JogoLite")
@@ -1534,6 +1596,8 @@ programa
 
 	funcao inicio()
 	{
+		//função inicial
+		//joga para as funções correspondentes
 		inicializar()
 		carregar_imagens()
 		carregar_personagem(selecao_de_personagem())
@@ -1545,6 +1609,8 @@ programa
  * Esta seção do arquivo guarda informações do Portugol Studio.
  * Você pode apagá-la se estiver utilizando outro editor.
  * 
- * @POSICAO-CURSOR = 39498; 
- * @DOBRAMENTO-CODIGO = [135, 144, 153, 164, 173, 196, 200, 205, 220, 241, 253, 302, 315, 332, 350, 368, 387, 418, 508, 531, 578, 585, 627, 654, 684, 714, 732, 764, 787, 797, 824, 832, 847, 872, 918, 923, 948, 961, 967, 982, 1012, 1054, 1080, 1093, 1123, 1153, 1166, 1175, 1182, 1230, 1254, 1260, 1266, 1272, 1278, 1285, 1298, 1308, 1314, 1337, 1400, 1412, 1428, 1435, 1442, 1449, 1491, 1509, 1527, 1534];
+ * @POSICAO-CURSOR = 929; 
+ * @DOBRAMENTO-CODIGO = [162, 171, 180, 191, 200, 223, 227, 232, 247, 268, 280, 329, 342, 359, 377, 395, 414, 445, 535, 558, 605, 612, 654, 681, 711, 741, 759, 791, 814, 824, 851, 859, 874, 899, 951, 957, 983, 997, 1004, 1019, 1053, 1075, 1098, 1126, 1140, 1171, 1202, 1216, 1227, 1235, 1284, 1309, 1316, 1323, 1331, 1345, 1356, 1363, 1387, 1452, 1465, 1482, 1490, 1499, 1507, 1551, 1570, 1588, 1596];
+ * @PONTOS-DE-PARADA = ;
+ * @SIMBOLOS-INSPECIONADOS = ;
  */
